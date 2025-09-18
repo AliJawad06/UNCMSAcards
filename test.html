@@ -1,133 +1,162 @@
 <html>
 <head>
-    <title>Image Copy with Unique ID</title>
+    <title>Image Copy with Controlled Downloads</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #upload {
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
+    <h1>Image Processor with Controlled Downloads</h1>
+    
     <input type="file" id="upload" accept="image/*" />
+    
+    <div class="controls">
+        <label for="delay">Delay between downloads (seconds): </label>
+        <input type="number" id="delay" value="1" min="0.1" max="10" step="0.1">
+    </div>
+    
+    <div class="controls">
+        <button id="startBtn" disabled>Start Processing</button>
+        <button id="stopBtn" disabled>Stop</button>
+    </div>
+    
+    <div class="status" id="status">Upload an image to begin...</div>
+    
     <canvas id="canvas" style="display:none;"></canvas>
+    
     <script>
+        let isProcessing = false;
+        let currentIndex = 0;
+        let processTimeout;
+        let uploadedImage = null;
+        
+        const taken = [];
+        
+        const namesArray = [
+            "Sumaya Addish", "Muhammad Zain Zeeshan Malik", "Mary Pope Bourne",
+            "Maab Sulieman", "Anas Zaraf", "Farouk Charkas", "Denizhan Kilic",
+            "Khizra Ahmad", "Muntasir Chowdhury", "Ahmad Akkila", "Zaina Shawarbeh",
+            "Zuhair Abouelkheir", "Zohair Ahmed", "Yusra Arafeh", "Faheem Alam",
+            "Shayan Raja", "Sarah Jimenez", "Mostafa Sulaiman", "Eiman Elkoumy",
+            "Raheq Hassan", "Aadil Mohammed", "Abdul Basith Basheer", "Aadil Ahmad",
+            "Ribah Khan", "Arwa Sattar", "Rafay Niazi", "Hamza Adnan", "Deeya Majeed",
+            "Alhagi Faal", "Aasif Ansari", "Zayba Iqbal", "Zahra Qureshi",
+            "Yasin Abubakar", "Mohammad Jaan", "Aliha Younus", "Bushra Elfgeeh",
+            "Rodina Eliwa", "Ali Jawad"
+        ];
+        
+        // Filter out taken names
+        const availableNames = namesArray.filter(name => !taken.includes(name));
+        
         document.getElementById('upload').onchange = function(event) {
             const file = event.target.files[0];
+            if (!file) return;
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    const canvas = document.getElementById('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const taken = [
-  "Aadil Ahmad",
-  "Bushra Elfgeeh",
-  "Mary Pope Bourne",
-  "Shayan Raja",
-  "Aadil Mohammed",
-  "Deeya Majeed",
-  "Mohammad Jaan",
-  "Sumaya Addish",
-  "Aasif Ansari",
-  "Denizhan Kilic",
-  "Mostafa Sulaiman",
-  "Yasin Abubakar",
-  "Abdul Basith Basheer",
-  "Eiman Elkoumy",
-  "Muhammad Zain Zeeshan Malik",
-  "Yusra Arafeh",
-  "Ahmad Akkila",
-  "Faheem Alam",
-  "Muntasir Chowdhury",
-  "Zahra Qureshi",
-  "Alhagi Faal",
-  "Farouk Charkas",
-  "Rafay Niazi",
-  "Zaina Shawarbeh",
-  "Aliha Younus",
-  "Hamza Adnan",
-  "Raheq Hassan",
-  "Zayba Iqbal",
-  "Anas Zaraf",
-  "Khizra Ahmad",
-  "Ribah Khan",
-  "Zohair Ahmed",
-  "Arwa Sattar",
-  "Maab Sulieman",
-  "Sarah Jimenez",
-  "Zuhair Abouelkheir"
-]
-
-
-
-                    const namesArray = [
-  "Sumaya Addish",
-  "Muhammad Zain Zeeshan Malik",
-  "Mary Pope Bourne",
-  "Maab Sulieman",
-  "Anas Zaraf",
-  "Farouk Charkas",
-  "Denizhan Kilic",
-  "Khizra Ahmad",
-  "Muntasir Chowdhury",
-  "Ahmad Akkila",
-  "Zaina Shawarbeh",
-  "Zuhair Abouelkheir",
-  "Zohair Ahmed",
-  "Yusra Arafeh",
-  "Faheem Alam",
-  "Shayan Raja",
-  "Sarah Jimenez",
-  "Mostafa Sulaiman",
-  "Eiman Elkoumy",
-  "Raheq Hassan",
-  "Aadil Mohammed",
-  "Abdul Basith Basheer",
-  "Aadil Ahmad",
-  "Ribah Khan",
-  "Arwa Sattar",
-  "Rafay Niazi",
-  "Hamza Adnan",
-  "Deeya Majeed",
-  "Alhagi Faal",
-  "Aasif Ansari",
-  "Zayba Iqbal",
-  "Zahra Qureshi",
-  "Yasin Abubakar",
-  "Mohammad Jaan",
-  "Aliha Younus",
-  "Bushra Elfgeeh",
-"Rodina Eliwa",
-  "Ali Jawad"
-];
-
-
-                    for(const name of namesArray){
-                  
-
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0);
-                        // Example: Add text to the image
-                        ctx.font = '30px black Courier prime bold';
-                        ctx.fillStyle =  'black';
-                        
-                        const naam = `${name}`
-                        if(!taken.includes(naam)){
-                        
-                        ctx.fillText(naam, 45, 260);
-                        console.log(naam);
-
-                        
-                        const link = document.createElement('a');
-                        link.download = naam + '.png';
-                        link.href = canvas.toDataURL('image/png');
-                        link.click();
-
-                        }
-                        
-                    }
+                    uploadedImage = img;
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('status').textContent = 
+                        `Image loaded! Ready to process ${availableNames.length} names.`;
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         };
+        
+        document.getElementById('startBtn').onclick = function() {
+            if (isProcessing || !uploadedImage) return;
+            
+            isProcessing = true;
+            currentIndex = 0;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            processNextImage();
+        };
+        
+        document.getElementById('stopBtn').onclick = function() {
+            stopProcessing();
+        };
+        
+        function processNextImage() {
+            if (!isProcessing || currentIndex >= availableNames.length) {
+                if (currentIndex >= availableNames.length) {
+                    document.getElementById('status').textContent = 'All downloads completed!';
+                }
+                stopProcessing();
+                return;
+            }
+            
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = uploadedImage.width;
+            canvas.height = uploadedImage.height;
+            
+            const name = availableNames[currentIndex];
+            
+            // Clear and redraw
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(uploadedImage, 0, 0);
+            
+            // Add text
+            ctx.font = '30px Courier, monospace';
+            ctx.fillStyle = 'black';
+            ctx.fillText(name, 45, 260);
+            
+            // Create download
+            const link = document.createElement('a');
+            link.download = name + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // Update status
+            document.getElementById('status').textContent = 
+                `Processing: ${name} (${currentIndex + 1}/${availableNames.length})`;
+            
+            currentIndex++;
+            
+            // Schedule next download
+            const delay = parseFloat(document.getElementById('delay').value) * 1000;
+            processTimeout = setTimeout(processNextImage, delay);
+        }
+        
+        function stopProcessing() {
+            isProcessing = false;
+            clearTimeout(processTimeout);
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            
+            if (currentIndex < availableNames.length) {
+                document.getElementById('status').textContent = 
+                    `Processing stopped at ${currentIndex}/${availableNames.length}`;
+            }
+        }
     </script>
 </body>
 </html>
