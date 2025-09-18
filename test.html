@@ -1,0 +1,133 @@
+<html>
+<head>
+    <title>Image Copy with Unique ID</title>
+</head>
+<body>
+    <input type="file" id="upload" accept="image/*" />
+    <canvas id="canvas" style="display:none;"></canvas>
+    <script>
+        document.getElementById('upload').onchange = function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.getElementById('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const taken = [
+  "Aadil Ahmad",
+  "Bushra Elfgeeh",
+  "Mary Pope Bourne",
+  "Shayan Raja",
+  "Aadil Mohammed",
+  "Deeya Majeed",
+  "Mohammad Jaan",
+  "Sumaya Addish",
+  "Aasif Ansari",
+  "Denizhan Kilic",
+  "Mostafa Sulaiman",
+  "Yasin Abubakar",
+  "Abdul Basith Basheer",
+  "Eiman Elkoumy",
+  "Muhammad Zain Zeeshan Malik",
+  "Yusra Arafeh",
+  "Ahmad Akkila",
+  "Faheem Alam",
+  "Muntasir Chowdhury",
+  "Zahra Qureshi",
+  "Alhagi Faal",
+  "Farouk Charkas",
+  "Rafay Niazi",
+  "Zaina Shawarbeh",
+  "Aliha Younus",
+  "Hamza Adnan",
+  "Raheq Hassan",
+  "Zayba Iqbal",
+  "Anas Zaraf",
+  "Khizra Ahmad",
+  "Ribah Khan",
+  "Zohair Ahmed",
+  "Arwa Sattar",
+  "Maab Sulieman",
+  "Sarah Jimenez",
+  "Zuhair Abouelkheir"
+]
+
+
+
+                    const namesArray = [
+  "Sumaya Addish",
+  "Muhammad Zain Zeeshan Malik",
+  "Mary Pope Bourne",
+  "Maab Sulieman",
+  "Anas Zaraf",
+  "Farouk Charkas",
+  "Denizhan Kilic",
+  "Khizra Ahmad",
+  "Muntasir Chowdhury",
+  "Ahmad Akkila",
+  "Zaina Shawarbeh",
+  "Zuhair Abouelkheir",
+  "Zohair Ahmed",
+  "Yusra Arafeh",
+  "Faheem Alam",
+  "Shayan Raja",
+  "Sarah Jimenez",
+  "Mostafa Sulaiman",
+  "Eiman Elkoumy",
+  "Raheq Hassan",
+  "Aadil Mohammed",
+  "Abdul Basith Basheer",
+  "Aadil Ahmad",
+  "Ribah Khan",
+  "Arwa Sattar",
+  "Rafay Niazi",
+  "Hamza Adnan",
+  "Deeya Majeed",
+  "Alhagi Faal",
+  "Aasif Ansari",
+  "Zayba Iqbal",
+  "Zahra Qureshi",
+  "Yasin Abubakar",
+  "Mohammad Jaan",
+  "Aliha Younus",
+  "Bushra Elfgeeh",
+"Rodina Eliwa",
+  "Ali Jawad"
+];
+
+
+                    for(const name of namesArray){
+                  
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0);
+                        // Example: Add text to the image
+                        ctx.font = '30px black Courier prime bold';
+                        ctx.fillStyle =  'black';
+                        
+                        const naam = `${name}`
+                        if(!taken.includes(naam)){
+                        
+                        ctx.fillText(naam, 45, 260);
+                        console.log(naam);
+
+                        
+                        const link = document.createElement('a');
+                        link.download = naam + '.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+
+                        }
+                        
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+    </script>
+</body>
+</html>
