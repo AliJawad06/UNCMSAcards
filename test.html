@@ -34,6 +34,12 @@
     <input type="file" id="upload" accept="image/*" />
     
     <div class="controls">
+        <label for="names">Names (one per line):</label>
+        <br>
+        <textarea id="names" rows="10" cols="50" placeholder="Enter names, one per line..."></textarea>
+    </div>
+    
+    <div class="controls">
         <label for="delay">Delay between downloads (seconds): </label>
         <input type="number" id="delay" value="1" min="0.1" max="10" step="0.1">
     </div>
@@ -55,21 +61,16 @@
         
         const taken = [];
         
-        const namesArray = [
-            "Sumaya Addish", "Muhammad Zain Zeeshan Malik", "Mary Pope Bourne",
-            "Maab Sulieman", "Anas Zaraf", "Farouk Charkas", "Denizhan Kilic",
-            "Khizra Ahmad", "Muntasir Chowdhury", "Ahmad Akkila", "Zaina Shawarbeh",
-            "Zuhair Abouelkheir", "Zohair Ahmed", "Yusra Arafeh", "Faheem Alam",
-            "Shayan Raja", "Sarah Jimenez", "Mostafa Sulaiman", "Eiman Elkoumy",
-            "Raheq Hassan", "Aadil Mohammed", "Abdul Basith Basheer", "Aadil Ahmad",
-            "Ribah Khan", "Arwa Sattar", "Rafay Niazi", "Hamza Adnan", "Deeya Majeed",
-            "Alhagi Faal", "Aasif Ansari", "Zayba Iqbal", "Zahra Qureshi",
-            "Yasin Abubakar", "Mohammad Jaan", "Aliha Younus", "Bushra Elfgeeh",
-            "Rodina Eliwa", "Ali Jawad"
-        ];
+        // Function to get names from textarea
+        function getNamesFromTextArea() {
+            const textarea = document.getElementById('names');
+            return textarea.value
+                .split('\n')
+                .map(name => name.trim())
+                .filter(name => name.length > 0);
+        }
         
-        // Filter out taken names
-        const availableNames = namesArray.filter(name => !taken.includes(name));
+        // Remove the hardcoded namesArray - it will be generated from textarea
         
         document.getElementById('upload').onchange = function(event) {
             const file = event.target.files[0];
@@ -80,9 +81,7 @@
                 const img = new Image();
                 img.onload = function() {
                     uploadedImage = img;
-                    document.getElementById('startBtn').disabled = false;
-                    document.getElementById('status').textContent = 
-                        `Image loaded! Ready to process ${availableNames.length} names.`;
+                    updateStatus();
                 };
                 img.src = e.target.result;
             };
@@ -90,7 +89,8 @@
         };
         
         document.getElementById('startBtn').onclick = function() {
-            if (isProcessing || !uploadedImage) return;
+            const availableNames = getAvailableNames();
+            if (isProcessing || !uploadedImage || availableNames.length === 0) return;
             
             isProcessing = true;
             currentIndex = 0;
@@ -104,7 +104,34 @@
             stopProcessing();
         };
         
+        // Update status when names change
+        document.getElementById('names').addEventListener('input', updateStatus);
+        
+        function getAvailableNames() {
+            const namesArray = getNamesFromTextArea();
+            return namesArray.filter(name => !taken.includes(name));
+        }
+        
+        function updateStatus() {
+            const availableNames = getAvailableNames();
+            const hasImage = uploadedImage !== null;
+            const hasNames = availableNames.length > 0;
+            
+            document.getElementById('startBtn').disabled = !hasImage || !hasNames || isProcessing;
+            
+            if (!hasImage) {
+                document.getElementById('status').textContent = 'Upload an image to begin...';
+            } else if (!hasNames) {
+                document.getElementById('status').textContent = 'Enter names in the text field to begin...';
+            } else {
+                document.getElementById('status').textContent = 
+                    `Ready to process ${availableNames.length} names.`;
+            }
+        }
+        
         function processNextImage() {
+            const availableNames = getAvailableNames();
+            
             if (!isProcessing || currentIndex >= availableNames.length) {
                 if (currentIndex >= availableNames.length) {
                     document.getElementById('status').textContent = 'All downloads completed!';
@@ -149,12 +176,12 @@
         function stopProcessing() {
             isProcessing = false;
             clearTimeout(processTimeout);
-            document.getElementById('startBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
+            updateStatus();
             
-            if (currentIndex < availableNames.length) {
+            if (currentIndex > 0 && currentIndex < getAvailableNames().length) {
                 document.getElementById('status').textContent = 
-                    `Processing stopped at ${currentIndex}/${availableNames.length}`;
+                    `Processing stopped at ${currentIndex}/${getAvailableNames().length}`;
             }
         }
     </script>
